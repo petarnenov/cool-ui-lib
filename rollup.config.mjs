@@ -2,8 +2,8 @@ import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import dts from "rollup-plugin-dts";
-
-import pkg from "./package.json";
+import postcss from "rollup-plugin-postcss";
+import pkg from "./package.json" assert { type: "json" };
 
 export default [
   {
@@ -21,14 +21,21 @@ export default [
       },
     ],
     plugins: [
-      typescript({ tsconfig: "./tsconfig.json" }),
+      postcss({
+        inject: true,
+        modules: true,
+        minimize: true,
+        extensions: [".css"],
+      }),
       resolve(),
       commonjs(),
+      typescript({ tsconfig: "./tsconfig.json" }),
     ],
   },
-    {
-        input: "dist/esm/types/index.d.ts",
-        output: [{ file: "./dist/index.d.ts", format: "esm" }],
-        plugins: [dts()],
-    },
+  {
+    input: "src/index.ts",
+    plugins: [dts()],
+    output: [{ file: "dist/index.d.ts", format: "esm" }],
+    external: [/\.css$/],
+  },
 ];
